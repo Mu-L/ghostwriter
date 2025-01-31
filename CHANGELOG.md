@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* Issue #465799: Segmentation fault no longer occurs when .conf file is missing on first launch.
+
+## [24.08.0]
+
+### Added
+
+* Added more icons to menu actions.
+* Ported to Qt6.
+
+### Fixed
+
+* Issue #487636: Unicode characters at the start or end of formatted text are now correctly highlighted.
+* Issue #482078: First character on a new line within a list is no longer highlighted as markup text.
+* Issue #475234: ghostwriter now remembers its font settings between sessions.
+* Issue #485691: ghostwriter not longer crashes on launch after the port to Qt6.
+
+### Removed
+
+* Replaced QtFontAwesome usage with SVG icons due to corner case where Qt could
+  not find the Font Awesome fonts when Qt was built from scratch.
+
+## [23.08.5]
+
+### Fixed
+
 * Added syntax highlighting and live spell check performance improvements.
 * Fixed corner cases for toggling of bold, italic, and strikethrough formatting.
 

@@ -1,5 +1,5 @@
 ﻿/*
- * SPDX-FileCopyrightText: 2014-2023 Megan Conkle <megan.conkle@kdemail.net>
+ * SPDX-FileCopyrightText: 2014-2024 Megan Conkle <megan.conkle@kdemail.net>
  * SPDX-FileCopyrightText: 2009-2014 Graeme Gott <graeme@gottcode.org>
  * SPDX-FileCopyrightText: 2012 Dmitry Shachnev
  *
@@ -775,6 +775,7 @@ QVariant MarkdownEditor::inputMethodQuery(Qt::InputMethodQuery query) const
         QFontMetrics metrics(font());
         QRect r = cursorRect();
         r.translate(contentOffset().toPoint());
+        r.translate(viewportMargins().left(), 0);
         r.adjust(0, metrics.ascent(), 0, metrics.ascent());
         return r;
     }
@@ -840,7 +841,7 @@ void MarkdownEditor::dropEvent(QDropEvent *e)
         QFileInfo fileInfo(path);
         QString fileExtension = fileInfo.suffix().toLower();
 
-        QTextCursor dropCursor = cursorForPosition(e->pos());
+        QTextCursor dropCursor = cursorForPosition(e->position().toPoint());
 
         // If the file extension indicates an image type, then insert an
         // image link into the text.
@@ -877,15 +878,7 @@ void MarkdownEditor::dropEvent(QDropEvent *e)
             //
             QMimeData *dummyMimeData = new QMimeData();
             dummyMimeData->setText("");
-            QDropEvent *dummyEvent =
-                new QDropEvent
-            (
-                e->pos(),
-                e->possibleActions(),
-                dummyMimeData,
-                e->mouseButtons(),
-                e->keyboardModifiers()
-            );
+            QDropEvent *dummyEvent = new QDropEvent(e->position().toPoint(), e->possibleActions(), dummyMimeData, e->buttons(), e->modifiers());
             QPlainTextEdit::dropEvent(dummyEvent);
 
             delete dummyEvent;
@@ -1453,6 +1446,14 @@ void MarkdownEditor::unindentText()
     cursor.endEditBlock();
 }
 
+void MarkdownEditor::deselectText()
+{
+    QTextCursor cursor = textCursor();
+
+    cursor.clearSelection();
+    setTextCursor(cursor);
+}
+
 bool MarkdownEditor::toggleTaskComplete()
 {
     Q_D(MarkdownEditor);
@@ -1888,13 +1889,8 @@ void MarkdownEditorPrivate::parseDocument()
 void MarkdownEditorPrivate::parseText(const QString &text)
 {
     Q_Q(MarkdownEditor);
-    
-    MarkdownAST *ast =
-        CmarkGfmAPI::instance()->parse
-        (
-            text,
-            false
-        );
+
+    MarkdownAST *ast = CmarkGfmAPI::instance()->parse(text, false);
 
     // Note:  MarkdownDocument is responsible for freeing memory
     // allocated for the AST.
